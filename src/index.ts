@@ -2,6 +2,7 @@
 
 import chalk from 'chalk';
 import { Command } from 'commander';
+import { getRandomJoke } from 'random-jokes';
 import ora from 'ora';  // For loading animation
 
 const program = new Command();
@@ -53,6 +54,32 @@ program
     showHelpInfo();
   });
 
+// Exit Command to close the terminal
+program
+  .command('exit')
+  .description('Exit the terminal')
+  .action(() => {
+    console.log(chalk.red('Goodbye! Exiting the terminal...'));
+    process.exit(0);
+  });
+
+// Joke Command to get a random joke
+program
+  .command('joke')
+  .description('Get a random joke')
+  .action(async () => {
+    try {
+      const joke = await getRandomJoke();
+      if (joke && joke.joke) {
+        console.log(chalk.yellow(joke.joke));
+      } else {
+        console.log(chalk.red('Failed to fetch a joke.'));
+      }
+    } catch (error) {
+      console.log(chalk.red('Error fetching joke:', error));
+    }
+  });
+
 // Function to display help info
 function showHelpInfo() {
   console.log(chalk.green('Welcome to VeNoM CLI!'));
@@ -60,5 +87,6 @@ function showHelpInfo() {
   console.log(chalk.magenta('- greet [name]    : Greet a person'));
   console.log(chalk.magenta('- version         : Show version'));
   console.log(chalk.magenta('- ascii [text]    : Display ASCII art'));
+  console.log(chalk.rgb(255, 165, 0)('- exit            : Exit the terminal'));
+  console.log(chalk.cyan('- joke            : Get a random joke'));
 }
-
