@@ -23,7 +23,7 @@ VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for p
    cd VeNoM-CLI
 2. **Install the dependencies**:
    ```bash
-   npm install -g venom-cli
+   npm install -g venom-cli-toolkit
 3. **Run the code**:
    ```bash
    venom -h
