@@ -1,6 +1,6 @@
 # VeNoM-CLI
 
-VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for performing system operations, automating tasks, and providing real-time diagnostics. The tool includes various features, including random joke generation, file operations, and system monitoring.
+VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for performing system operations, automating tasks, and providing real-time diagnostics. The tool includes various features, including project creation file, file operations, and system monitoring.
 
 ## Features
 - File operations: copy, move, delete, etc.
@@ -32,4 +32,4 @@ VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for p
 - **greet** - Greet a person with a customizable message.
 - **version** - Gets the current version of cli.
 - **exit** - Terminates the cli with "Good bye Message".
-- **jokes** - Randomly tells the jokes.
+- **new <projectname>** - Creates a new project by selecting templates.
