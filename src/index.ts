@@ -7,8 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import inquirer from 'inquirer';
 import { execSync } from 'child_process';
-const program = new Command();
 
+const program = new Command();
 const spinner = ora(); // Initialize spinner (do not start immediately)
 
 // Display CLI header
@@ -71,7 +71,7 @@ program
     process.exit(0);
   });
 
-// Create New Project Function
+/// Create New Project Function
 function createNewProject(projectName: string) {
   const projectPath = path.resolve(process.cwd(), projectName);
 
@@ -86,7 +86,7 @@ function createNewProject(projectName: string) {
         type: 'list',
         name: 'template',
         message: 'Choose a project template:',
-        choices: ['React', 'Node.js', 'TypeScript', 'Empty'],
+        choices: ['React', 'Node.js', 'TypeScript', 'Angular', 'Vite', 'Empty'],
       },
     ])
     .then(({ template }) => {
@@ -107,17 +107,98 @@ function createNewProject(projectName: string) {
         case 'TypeScript':
           setupTypeScriptProject(projectPath, projectName);
           break;
+        case 'Angular':
+          setupAngularProject(projectPath, projectName);
+          break;
+        case 'Vite':
+          setupViteProject(projectPath, projectName);
+          break;
         default:
           console.log(chalk.yellow('Empty project created.'));
       }
     });
 }
 
+// Angular Project Setup
+function setupAngularProject(projectPath: string, projectName: string) {
+  spinner.start('Setting up Angular project...');
+  try {
+    // Initialize Angular app
+    execSync(`npx @angular/cli new ${projectName} --directory .`, { cwd: projectPath, stdio: 'inherit' });
+
+    spinner.succeed('Angular project setup complete.');
+    console.log(chalk.cyan(`cd ${projectName}`));
+    console.log(chalk.cyan('npm start'));
+  } catch (error) {
+    spinner.fail('Failed to set up Angular project.');
+    console.error(error);
+  }
+}
+
+// Vite Project Setup
+function setupViteProject(projectPath: string, projectName: string) {
+  spinner.start('Setting up Vite project...');
+  try {
+    // Initialize Vite app
+    execSync(`npm create vite@latest ${projectName} --template react`, { cwd: projectPath, stdio: 'inherit' });
+
+    spinner.succeed('Vite project setup complete.');
+    console.log(chalk.cyan(`cd ${projectName}`));
+    console.log(chalk.cyan('npm install'));
+    console.log(chalk.cyan('npm run dev'));
+  } catch (error) {
+    spinner.fail('Failed to set up Vite project.');
+    console.error(error);
+  }
+}
+
 // React Project Setup
 function setupReactProject(projectPath: string, projectName: any) {
   spinner.start('Setting up React project...');
   try {
+    // Initialize React app
     execSync('npx create-react-app .', { cwd: projectPath, stdio: 'inherit' });
+
+    // Install web-vitals
+    execSync('npm install web-vitals', { cwd: projectPath, stdio: 'inherit' });
+
+    // Create custom CSS file (styles.css)
+    const cssFile = path.join(projectPath, 'src', 'styles.css');
+    const cssContent = `
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      .logo {
+        width: 100px;
+        height: 100px;
+        display: block;
+        margin: 20px auto;
+      }
+    `;
+    fs.writeFileSync(cssFile, cssContent);
+
+    // Add logo image (just an empty file for now)
+    const logoImage = path.join(projectPath, 'public', 'logo.png');
+    fs.writeFileSync(logoImage, ''); // Replace with actual logo later
+
+    // Update App.js to include logo and styles
+    const appJsxFile = path.join(projectPath, 'src', 'App.js');
+    let appJsxContent = fs.readFileSync(appJsxFile, 'utf-8');
+    
+    appJsxContent = appJsxContent.replace(
+      'import logo from \'./logo.svg\';',
+      'import \'./styles.css\'; // Custom CSS\nimport logo from \'./logo.png\'; // VanshJS logo'
+    );
+
+    appJsxContent = appJsxContent.replace(
+      '<header className="App-header">',
+      `<header className="App-header">
+        <img src={logo} className="logo" alt="logo" />`
+    );
+
+    fs.writeFileSync(appJsxFile, appJsxContent);
+
     spinner.succeed('React project setup complete.');
     console.log(chalk.cyan(`cd ${projectName}`));
     console.log(chalk.cyan('npm start'));
@@ -185,6 +266,7 @@ function setupTypeScriptProject(projectPath: string, projectName: any) {
     console.error(error);
   }
 }
+
 
 // Start CLI
 program.parse(process.argv);
