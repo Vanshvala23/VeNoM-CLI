@@ -5,14 +5,13 @@ VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for p
 ## Features
 - File operations: copy, move, delete, etc.
 - Network diagnostics and system monitoring.
-- Joke generator using **random-jokes** API.
 - Real-time system monitoring and task automation.
 - Easy-to-use CLI interface built with **Inquirer.js**.
 
 ## Technologies Used
 - **Node.js** - Runtime environment.
 - **TypeScript** - For strong typing and better code structure.
-- **random-jokes** - For generating jokes.
+- **in-built framework generator** - For creating a frameworks.
 - **Inquirer.js** - For interactive CLI prompts.
 
 ## Setup Instructions
@@ -24,10 +23,10 @@ VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for p
    cd VeNoM-CLI
 2. **Install the dependencies**:
    ```bash
-   npm install
+   npm install -g venom-cli
 3. **Run the code**:
    ```bash
-   npx venom.tsx[options]
+   venom -h
 
 ## Available Commands
 - **greet** - Greet a person with a customizable message.

@@ -1,5 +1,5 @@
 {
-  "name": "venom-cli-tools",
+  "name": "venom-cli-toolkit",
   "version": "1.0.0",
   "main": "dist/index.js",
   "type": "module",
@@ -20,6 +20,8 @@
   "description": "A sample CLI tool with advanced features",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "figlet": "^1.8.0",
