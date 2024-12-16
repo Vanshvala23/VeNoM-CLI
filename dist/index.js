@@ -1,17 +1,11 @@
 #!/usr/bin/env node
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { getRandomJoke } from 'random-jokes';
 import ora from 'ora'; // For loading animation
+import fs from 'fs';
+import path from 'path';
+import inquirer from 'inquirer';
+import { execSync } from 'child_process';
 const program = new Command();
 // Show loading spinner automatically on startup
 const spinner = ora('Loading...').start();
@@ -62,24 +56,138 @@ program
     console.log(chalk.red('Goodbye! Exiting the terminal...'));
     process.exit(0);
 });
-// Joke Command to get a random joke
-program
-    .command('joke')
-    .description('Get a random joke')
-    .action(() => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const joke = yield getRandomJoke();
-        if (joke && joke.joke) {
-            console.log(chalk.yellow(joke.joke));
+program.command('new <projectName>')
+    .description('Create a new project')
+    .action((projectName) => {
+    createNewProject(projectName);
+});
+program.addCommand(new Command('info')
+    .description('Display information about the CLI tool')
+    .action(() => {
+    console.log(chalk.green('veNoM CLI - A sample CLI tool with advanced features made by Vansh'));
+    console.log(chalk.bgMagentaBright('More infomation go to my Github profile **VanshVala23**'));
+}));
+function createNewProject(projectName) {
+    const project = path.resolve(process.cwd(), projectName);
+    if (fs.existsSync(project)) {
+        console.log(chalk.red(`Project folder "${projectName}" already exists!`));
+        return;
+    }
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'type',
+            message: 'Choose a project template:',
+            choices: ['React', 'Node.js', 'TypeScript', 'None'],
+        },
+    ]).then((answers) => {
+        console.log(chalk.green(`Creating a new project "${projectName}" with template "${answers.type}"...`));
+        // Create the project folder
+        fs.mkdirSync(project);
+        // Add a README.md file
+        fs.writeFileSync(path.join(project, 'README.md'), `# ${projectName}\n\nThis is a new project created with veNoM CLI.\n`);
+        // Add a .gitignore file
+        fs.writeFileSync(path.join(project, '.gitignore'), 'node_modules\n');
+        if (answers.type === 'React') {
+            createReactApp(project);
+        }
+        else if (answers.type === 'Node.js') {
+            createNodeApp(project);
+        }
+        else if (answers.type === 'TypeScript') {
+            createTypeScriptApp(project);
         }
         else {
-            console.log(chalk.red('Failed to fetch a joke.'));
+            console.log(chalk.yellow('No template selected. Project created without any files.'));
         }
+    });
+}
+function createReactApp(project) {
+    const spinner = ora('Installing React dependencies...').start();
+    // Create package.json
+    const packageJson = {
+        name: 'my-react-app',
+        version: '1.0.0',
+        description: 'A React application created by veNoM CLI',
+        main: 'index.js',
+        dependencies: {
+            react: '^18.0.0',
+            'react-dom': '^18.0.0',
+        },
+        scripts: {
+            start: 'react-scripts start',
+            build: 'react-scripts build',
+            test: 'react-scripts test',
+            eject: 'react-scripts eject',
+        },
+    };
+    fs.writeFileSync(path.join(project, 'package.json'), JSON.stringify(packageJson, null, 2));
+    // Create basic React component files
+    const srcPath = path.join(project, 'src');
+    fs.mkdirSync(srcPath);
+    fs.writeFileSync(path.join(srcPath, 'index.js'), `import React from 'react';\nimport ReactDOM from 'react-dom';\n\nfunction App() {\n  return <h1>Hello, veNoM CLI React!</h1>;\n}\n\nReactDOM.render(<App />, document.getElementById('root'));`);
+    // Install dependencies using npm
+    try {
+        execSync('npm install', { cwd: project, stdio: 'inherit' });
+        spinner.succeed('React project setup complete');
     }
     catch (error) {
-        console.log(chalk.red('Error fetching joke:', error));
+        spinner.fail('Failed to install dependencies');
+        console.error(error);
     }
-}));
+}
+function createNodeApp(project) {
+    const spinner = ora('Installing Node.js dependencies...').start();
+    // Create package.json
+    const packageJson = {
+        name: 'my-node-app',
+        version: '1.0.0',
+        description: 'A Node.js application created by veNoM CLI',
+        main: 'index.js',
+        scripts: {
+            start: 'node index.js',
+        },
+    };
+    fs.writeFileSync(path.join(project, 'package.json'), JSON.stringify(packageJson, null, 2));
+    // Create basic Node.js files
+    fs.writeFileSync(path.join(project, 'index.js'), `console.log('Hello, veNoM CLI Node.js!');`);
+    // Install dependencies using npm
+    try {
+        execSync('npm install', { cwd: project, stdio: 'inherit' });
+        spinner.succeed('Node.js project setup complete');
+    }
+    catch (error) {
+        spinner.fail('Failed to install dependencies');
+        console.error(error);
+    }
+}
+function createTypeScriptApp(project) {
+    const spinner = ora('Installing TypeScript dependencies...').start();
+    // Create package.json
+    const packageJson = {
+        name: 'my-typescript-app',
+        version: '1.0.0',
+        description: 'A TypeScript application created by veNoM CLI',
+        main: 'index.js',
+        scripts: {
+            start: 'ts-node index.ts',
+        }
+    };
+    fs.writeFileSync(path.join(project, 'package.json'), JSON.stringify(packageJson, null, 2));
+    // Create basic TypeScript files
+    const srcPath = path.join(project, 'src');
+    fs.mkdirSync(srcPath);
+    fs.writeFileSync(path.join(srcPath, 'index.ts'), `console.log('Hello, veNoM CLI TypeScript!');`);
+    // Install dependencies using npm
+    try {
+        execSync('npm install typescript ts-node @types/node --save-dev', { cwd: project, stdio: 'inherit' });
+        spinner.succeed('TypeScript project setup complete');
+    }
+    catch (error) {
+        spinner.fail('Failed to install dependencies');
+        console.error(error);
+    }
+}
 // Function to display help info
 function showHelpInfo() {
     console.log(chalk.green('Welcome to VeNoM CLI!'));
@@ -88,5 +196,5 @@ function showHelpInfo() {
     console.log(chalk.magenta('- version         : Show version'));
     console.log(chalk.magenta('- ascii [text]    : Display ASCII art'));
     console.log(chalk.rgb(255, 165, 0)('- exit            : Exit the terminal'));
-    console.log(chalk.cyan('- joke            : Get a random joke'));
+    console.log(chalk.magenta('- info            : Display information about the CLI tool'));
 }
