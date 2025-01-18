@@ -1,11 +1,9 @@
 # VeNoM-CLI
 
-VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for performing system operations, automating tasks, and providing real-time diagnostics. The tool includes various features, including project creation file, file operations, and system monitoring.
+VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for creating projects. The tool includes various features, including project creation file, file operations, and system monitoring.
 
 ## Features
-- File operations: copy, move, delete, etc.
-- Network diagnostics and system monitoring.
-- Real-time system monitoring and task automation.
+- Project creation: Create new projects by selecting templates.
 - Easy-to-use CLI interface built with **Inquirer.js**.
 
 ## Technologies Used
@@ -33,3 +31,9 @@ VeNoM-CLI is a command-line tool built with **Node.js** and **TypeScript** for p
 - **version** - Gets the current version of cli.
 - **exit** - Terminates the cli with "Good bye Message".
 - **new <projectname>** - Creates a new project by selecting templates.
+
+## License
+This project is licensed under the MIT License. For more information, please see the LICENSE file in the project.
+
+## Disclaimer
+All information in this README file is for educational purposes only. The author is not responsible for any loss or damage caused directly or indirectly by using the information in this README file.
