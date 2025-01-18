@@ -141,7 +141,7 @@ function setupViteProject(projectPath: string, projectName: any) {
   spinner.start('Setting up Vite project...');
   try {
     execSync(`npx create-vite@latest ${projectName} -- --template react`, { cwd: process.cwd(), stdio: 'inherit' });
-    execSync('npm install', { cwd: projectPath, stdio: 'inherit' });
+    execSync('npm install --legacy-peer-deps', { cwd: projectPath, stdio: 'inherit' });
 
     spinner.succeed('Vite project setup complete.');
     console.log(chalk.cyan(`cd ${projectName}`));
