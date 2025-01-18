@@ -3,70 +3,201 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var chalk_1 = require("chalk");
 var commander_1 = require("commander");
-var ora_1 = require("ora"); // For loading animation
+var ora_1 = require("ora");
+var fs_1 = require("fs");
+var path_1 = require("path");
+var inquirer_1 = require("inquirer");
+var child_process_1 = require("child_process");
+var figlet_1 = require("figlet");
 var program = new commander_1.Command();
-// Show loading spinner automatically on startup
-var spinner = (0, ora_1.default)('Loading...').start();
-setTimeout(function () {
-    spinner.succeed('Loading complete!');
-    console.log(chalk_1.default.magenta('You can use other commands now.'));
-    program.parse(process.argv); // Start the command parsing after the loading spinner
-}, 3000);
-program
-    .version('1.0.0')
-    .description('veNoM CLI - A sample CLI tool with advanced features');
+var spinner = (0, ora_1.default)(); // Initialize spinner
+// Display CLI header with figlet
+console.log(chalk_1.default.cyanBright(figlet_1.default.textSync("VeNoM CLI", { font: 'Slant' })));
+console.log(chalk_1.default.gray('Advanced CLI for project creation and management\n'));
+// CLI Version
+program.version('1.0.0').description('VeNoM CLI - Advanced CLI for project creation and management');
 // Greet Command
 program
     .command('greet [name]')
-    .description('Greet a person with a customizable message')
-    .option('-g, --greet <name>', 'Greet a user', 'World') // Define greet as part of the command
-    .action(function (name, options) {
-    var message = "Hello, ".concat(options.greet || name || 'World', "!");
-    console.log(chalk_1.default.green(message));
+    .description('Greet someone')
+    .action(function (name) {
+    var greetingName = name || 'World';
+    console.log(chalk_1.default.greenBright("Hello, ".concat(greetingName, "!")));
 });
-// Show Version Command
+// Version Command
 program
     .command('version')
-    .description('Show version')
+    .description('Show CLI version')
     .action(function () {
-    console.log(chalk_1.default.blue("veNoM CLI version: ".concat(program.version())));
+    console.log(chalk_1.default.blue("VeNoM CLI version: ".concat(program.version())));
 });
-// ASCII Command to Display Text
+// ASCII Art Command
 program
     .command('ascii')
-    .description('Display ASCII art with customizable text')
-    .option('-t, --text <text>', 'Text to convert to ASCII art', 'Hello')
+    .description('Display ASCII art')
+    .option('-t, --text <text>', 'Text for ASCII art', 'Hello')
     .action(function (options) {
-    console.log(chalk_1.default.yellow(options.text));
+    console.log(chalk_1.default.yellow(figlet_1.default.textSync(options.text, { font: 'Standard' })));
 });
-// Help Command to display available commands
+// Create New Project Command
 program
-    .command('help')
-    .description('Display help information with an ASCII art header')
-    .action(function () {
-    showHelpInfo();
+    .command('new <projectName>')
+    .description('Create a new project')
+    .action(function (projectName) {
+    spinner.start('Initializing project setup...');
+    createNewProject(projectName);
 });
-// Exit Command to close the terminal
+// Info Command
+program
+    .command('info')
+    .description('Display CLI info')
+    .action(function () {
+    console.log(chalk_1.default.green('VeNoM CLI - Developed by Vansh'));
+    console.log(chalk_1.default.yellow('Visit my GitHub: https://github.com/VanshVala23'));
+});
+// Exit Command
 program
     .command('exit')
-    .description('Exit the terminal')
+    .description('Exit CLI')
     .action(function () {
-    console.log(chalk_1.default.red('Goodbye! Exiting the terminal...'));
+    console.log(chalk_1.default.red('Goodbye! Exiting CLI...'));
     process.exit(0);
 });
-program.addCommand(new commander_1.Command('info')
-    .description('Display information about the CLI tool')
-    .action(function () {
-    console.log(chalk_1.default.green('veNoM CLI - A sample CLI tool with advanced features made by Vansh'));
-    console.log(chalk_1.default.bgMagentaBright('More infomation go to my Github profile **VanshVala23**'));
-}));
-// Function to display help info
-function showHelpInfo() {
-    console.log(chalk_1.default.green('Welcome to VeNoM CLI!'));
-    console.log(chalk_1.default.blue('Use the following commands:'));
-    console.log(chalk_1.default.magenta('- greet [name]    : Greet a person'));
-    console.log(chalk_1.default.magenta('- version         : Show version'));
-    console.log(chalk_1.default.magenta('- ascii [text]    : Display ASCII art'));
-    console.log(chalk_1.default.rgb(255, 165, 0)('- exit            : Exit the terminal'));
-    console.log(chalk_1.default.magenta('- info            : Display information about the CLI tool'));
+/// Create New Project Function
+function createNewProject(projectName) {
+    var projectPath = path_1.default.resolve(process.cwd(), projectName);
+    if (fs_1.default.existsSync(projectPath)) {
+        spinner.fail("Project folder \"".concat(projectName, "\" already exists."));
+        return;
+    }
+    inquirer_1.default
+        .prompt([
+        {
+            type: 'list',
+            name: 'template',
+            message: 'Choose a project template:',
+            choices: ['React', 'Node.js', 'TypeScript', 'Angular', 'Vite', 'Empty'],
+        },
+    ])
+        .then(function (_a) {
+        var template = _a.template;
+        spinner.succeed('Template selected');
+        fs_1.default.mkdirSync(projectPath);
+        fs_1.default.writeFileSync(path_1.default.join(projectPath, 'README.md'), "# ".concat(projectName, "\n\nGenerated by VeNoM CLI."));
+        switch (template) {
+            case 'React':
+                setupReactProject(projectPath, projectName);
+                break;
+            case 'Node.js':
+                setupNodeProject(projectPath, projectName);
+                break;
+            case 'TypeScript':
+                setupTypeScriptProject(projectPath, projectName);
+                break;
+            case 'Angular':
+                setupAngularProject(projectPath, projectName);
+                break;
+            case 'Vite':
+                setupViteProject(projectPath, projectName);
+                break;
+            default:
+                console.log(chalk_1.default.yellow('Empty project created.'));
+        }
+    });
 }
+// Angular Project Setup
+function setupAngularProject(projectPath, projectName) {
+    spinner.start('Setting up Angular project...');
+    try {
+        (0, child_process_1.execSync)("npx @angular/cli new ".concat(projectName, " --directory . --skip-install"), { cwd: projectPath, stdio: 'inherit' });
+        (0, child_process_1.execSync)('npm install', { cwd: projectPath, stdio: 'inherit' });
+        spinner.succeed('Angular project setup complete.');
+        console.log(chalk_1.default.cyan("cd ".concat(projectName)));
+        console.log(chalk_1.default.cyan('npm start'));
+    }
+    catch (error) {
+        spinner.fail('Failed to set up Angular project.');
+        console.error(error);
+    }
+}
+// Vite Project Setup
+function setupViteProject(projectPath, projectName) {
+    spinner.start('Setting up Vite project...');
+    try {
+        (0, child_process_1.execSync)("npx create-vite@latest ".concat(projectName, " -- --template react"), { cwd: process.cwd(), stdio: 'inherit' });
+        (0, child_process_1.execSync)('npm install --legacy-peer-deps', { cwd: projectPath, stdio: 'inherit' });
+        spinner.succeed('Vite project setup complete.');
+        console.log(chalk_1.default.cyan("cd ".concat(projectName)));
+        console.log(chalk_1.default.cyan('npm run dev'));
+    }
+    catch (error) {
+        spinner.fail('Failed to set up Vite project.');
+        console.error(error);
+    }
+}
+// React Project Setup
+function setupReactProject(projectPath, projectName) {
+    spinner.start('Setting up React project...');
+    try {
+        (0, child_process_1.execSync)("npx create-react-app ".concat(projectName), { cwd: process.cwd(), stdio: 'inherit' });
+        spinner.succeed('React project setup complete.');
+        console.log(chalk_1.default.green("Navigate to your project: cd ".concat(projectName)));
+        console.log(chalk_1.default.green('Start the development server: npm start'));
+    }
+    catch (error) {
+        spinner.fail('Failed to set up React project.');
+        if (error instanceof Error) {
+            console.error(chalk_1.default.red('Error:'), error.message);
+        }
+    }
+}
+// Node.js Project Setup
+function setupNodeProject(projectPath, projectName) {
+    spinner.start('Setting up Node.js app...');
+    var packageJson = {
+        name: projectName,
+        version: '1.0.0',
+        description: 'A Node.js application',
+        main: 'index.js',
+        scripts: {
+            start: 'node index.js',
+        },
+    };
+    fs_1.default.writeFileSync(path_1.default.join(projectPath, 'package.json'), JSON.stringify(packageJson, null, 2));
+    fs_1.default.writeFileSync(path_1.default.join(projectPath, 'index.js'), "console.log('Hello, ".concat(projectName, "!');"));
+    try {
+        (0, child_process_1.execSync)('npm install', { cwd: projectPath, stdio: 'inherit' });
+        spinner.succeed('Node.js project setup complete.');
+    }
+    catch (error) {
+        spinner.fail('Failed to install dependencies.');
+        console.error(error);
+    }
+}
+// TypeScript Project Setup
+function setupTypeScriptProject(projectPath, projectName) {
+    spinner.start('Setting up TypeScript app...');
+    var packageJson = {
+        name: projectName,
+        version: '1.0.0',
+        description: 'A TypeScript application',
+        main: 'index.ts',
+        scripts: {
+            start: 'ts-node src/index.ts',
+        },
+    };
+    var srcPath = path_1.default.join(projectPath, 'src');
+    fs_1.default.mkdirSync(srcPath, { recursive: true });
+    fs_1.default.writeFileSync(path_1.default.join(srcPath, 'index.ts'), "console.log('Hello, ".concat(projectName, "!');"));
+    fs_1.default.writeFileSync(path_1.default.join(projectPath, 'package.json'), JSON.stringify(packageJson, null, 2));
+    try {
+        (0, child_process_1.execSync)('npm install typescript ts-node @types/node --save-dev', { cwd: projectPath, stdio: 'inherit' });
+        spinner.succeed('TypeScript project setup complete.');
+    }
+    catch (error) {
+        spinner.fail('Failed to install dependencies.');
+        console.error(error);
+    }
+}
+// Start CLI
+program.parse(process.argv);
